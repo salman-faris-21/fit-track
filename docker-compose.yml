@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: fittrack-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Shanu@123
+      MYSQL_DATABASE: fittrack
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build: ./server
+    container_name: fittrack-server
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: Shanu@123
+      DB_NAME: fittrack
+
+  frontend:
+    build: ./client
+    container_name: fittrack-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

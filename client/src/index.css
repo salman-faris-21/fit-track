@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap");
+
+:root {
+  --color-primary: hsla(162, 100%, 52%, 0.368);
+  --color-secondary: #FBBF24;
+  --cyber-glow-primary: rgba(124, 58, 237, 0.5);
+  --cyber-grid-color: rgba(255, 255, 255, 0.1);
+  --background: #0a4538;
+  --muted-foreground: #000000;
+  --primary: #100e31;
+  --border: #2e2e2e;
+  --texture:#60e4ff;
+}
+
+* {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair', serif !important;
+}
+
+@keyframes moveGrid {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 5px 5px;
+  }
+}
+
+.animated-grid {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 5px 5px;
+  animation: moveGrid 10s linear infinite;
+}
+
+@keyframes scanline {
+  0% {
+    background-position: 0 -100%;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+.animate-scanline {
+  animation: scanline 2s linear infinite;
+}
+.text-foreground {
+  color: var(--muted-foreground);
+}
+.bg-background {
+  background-color: var(--background);
+}
+.border-border {
+  border-color: var(--border);
+}
+/* Colors */
+.text-primary {
+  color: var(--texture);
+}
+.text-secondary {
+  color: var(--color-secondary);
+}
+.text-muted {
+  color: var(--muted-foreground);
+}
+.text-foreground {
+  color: var(--muted-foreground);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+.bg-secondary {
+  background-color: var(--color-secondary);
+}
+.bg-background {
+  background-color: var(--background);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+.border-secondary {
+  border-color: var(--color-secondary);
+}
+.border-border {
+  border-color: var(--border);
+}
+
+/* Effects */
+.glow-primary {
+  box-shadow: 0 0 10px var(--cyber-glow-primary);
+}
+.grid-overlay {
+  background-image: linear-gradient(var(--cyber-grid-color) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--cyber-grid-color) 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+/* Typography */
+.font-outfit {
+  font-family: 'Outfit', sans-serif;
+}
+.font-playfair {
+  font-family: 'Playfair', serif !important;
+}
+.text-accent {
+  color: var(--color-primary);
+}
+.bg-accent {
+  background-color: var(--color-primary);
+}
