@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database and vector store files
+chroma_db/
+vectorstore/
+
+# Uploaded documents
+uploads/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environments / Secrets
+.env
+.env.local
+.env.production
+.env.development
+
+# Logs
+*.log
