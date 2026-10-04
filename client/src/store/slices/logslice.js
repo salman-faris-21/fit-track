@@ -7,7 +7,7 @@ export const fetchTodayLogs = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:3000/api/logs/today", {
+      const res = await fetch("http://localhost:5000/api/logs/today", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -25,7 +25,7 @@ export const fetchTodayLogs = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 /* ---------------- SAVE LOG ---------------- */
@@ -35,7 +35,7 @@ export const saveLog = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:3000/api/logs", {
+      const res = await fetch("http://localhost:5000/api/logs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export const saveLog = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 export const fetchWeeklyLogs = createAsyncThunk(
   "logs/fetchWeekly",
@@ -64,7 +64,7 @@ export const fetchWeeklyLogs = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:3000/api/logs/week", {
+      const res = await fetch("http://localhost:5000/api/logs/week", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,7 +76,7 @@ export const fetchWeeklyLogs = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.message);
     }
-  }
+  },
 );
 
 /* ---------------- SLICE ---------------- */

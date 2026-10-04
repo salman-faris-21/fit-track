@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Activity, Droplet, Moon, Dumbbell, Plus, Mic } from "lucide-react";
 
 import AddEntryModal from "../components/AddEntryModel";
@@ -11,46 +12,25 @@ import {
 } from "../store/slices/logslice.js";
 import api from "../lib/api.js";
 
-/* ---------------- STAT CARD ---------------- */
-
-const StatCard = ({ icon: Icon, label, value, unit, onAdd }) => (
-  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
-    <div className="flex items-center gap-4">
-      <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
-        <Icon size={26} />
-      </div>
-      <div className="flex-1">
-        <p className="text-sm text-slate-400">{label}</p>
-        <p className="text-2xl font-semibold text-slate-100">
-          {value} <span className="text-sm text-slate-400">{unit}</span>
-        </p>
-      </div>
-    </div>
-
-    <button
-      onClick={onAdd}
-      className="flex items-center justify-center gap-1 text-sm text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 rounded-lg py-2"
-    >
-      <Plus size={16} />
-      Add Today
-    </button>
+/* ---------------- KPI CARD ---------------- */
+const GradientCard = ({ title, value, unit, color }) => (
+  <div className={`p-5 rounded-xl bg-gradient-to-br ${color}`}>
+    <p className="text-sm text-white/80">{title}</p>
+    <h2 className="text-2xl font-bold mt-2">
+      {value} <span className="text-sm">{unit}</span>
+    </h2>
   </div>
 );
-
-/* ---------------- DASHBOARD ---------------- */
 
 const DashboardPage = () => {
   const dispatch = useDispatch();
 
-  /* -------- REDUX STATE -------- */
   const user = useSelector((state) => state.auth.user);
-  const { today, weekly, loading, saving } = useSelector((state) => state.logs);
-  const token = useSelector((state) => state.auth.token);
+  const { today, weekly, saving } = useSelector((state) => state.logs);
+  const navigate = useNavigate();
 
-  console.log("TOKEN:", token);
-  /* -------- MODAL STATE -------- */
+  const [analytics, setAnalytics] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-
   const [modalConfig, setModalConfig] = useState({
     title: "",
     unit: "",
@@ -62,29 +42,27 @@ const DashboardPage = () => {
     setModalOpen(true);
   };
 
-  /* -------- FETCH TODAY LOGS ON LOAD -------- */
+  /* ---------------- FETCH ---------------- */
   useEffect(() => {
     dispatch(fetchTodayLogs());
     dispatch(fetchWeeklyLogs());
   }, [dispatch]);
 
-  /* -------- SAVE LOG -------- */
-  const handleSubmit = async (value) => {
-    await dispatch(
-      saveLog({
-        type: modalConfig.type,
-        value,
-      }),
-    );
-
-    // refresh dashboard after save
-    dispatch(fetchTodayLogs());
-    setModalOpen(false);
+  const reportData = {
+    name: user?.name,
+    height: 170, // replace later with real user profile
+    weight: 70, // replace later with real user profile
+    goal: "Weight Loss",
+    workoutPlan: "30 min cardio + strength training",
+    dietPlan: "High protein, reduce sugar",
+    waterIntake: "3 Litres",
+    sleepRecommendation: "7-8 hours",
+    notes: "Stay consistent and track daily progress.",
   };
 
   const generatePDF = async () => {
     try {
-      const response = await api.post("/api/report/generate", reportData, {
+      const response = await api.post("/report/generate", reportData, {
         responseType: "blob", // IMPORTANT for PDF
       });
 
@@ -101,101 +79,250 @@ const DashboardPage = () => {
       alert("Failed to generate report");
     }
   };
-  const reportData = {
-    name: user?.name,
-    height: 170, // replace later with real user profile
-    weight: 70, // replace later with real user profile
-    goal: "Weight Loss",
-    workoutPlan: "30 min cardio + strength training",
-    dietPlan: "High protein, reduce sugar",
-    waterIntake: "3 Litres",
-    sleepRecommendation: "7-8 hours",
-    notes: "Stay consistent and track daily progress.",
-  };
 
   useEffect(() => {
-    if (!token) return;
-
-    const fetchReports = async () => {
+    const fetchAnalytics = async () => {
       try {
-        const { data } = await api.get("/api/report/get");
-        console.log("Reports:", data);
-      } catch (error) {
-        console.error(error.response?.data);
+        const { data } = await api.get("/insights");
+        setAnalytics(data);
+      } catch (err) {
+        console.error(err);
       }
     };
+    fetchAnalytics();
+  }, []);
 
-    fetchReports();
-  }, [token]);
-
-  /* ---------------- UI ---------------- */
+  /* ---------------- SAVE ---------------- */
+  const handleSubmit = async (value) => {
+    await dispatch(saveLog({ type: modalConfig.type, value }));
+    dispatch(fetchTodayLogs());
+    dispatch(fetchWeeklyLogs());
+    setModalOpen(false);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">
-            Good Evening, {user?.name || "Athlete"} 👋
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Track today’s progress easily
-          </p>
+    <div className="flex min-h-screen bg-[#0b0f1a] text-white">
+      {/* SIDEBAR */}
+      <div className="w-64 bg-[#111827] p-6 flex flex-col justify-between">
+        <div className="flex flex-col gap-8">
+          <h1 className="text-xl font-bold">FitTrack</h1>
+
+          <nav className="flex flex-col gap-3">
+            <button className="bg-purple-600 px-4 py-2 rounded-lg w-full text-left font-medium">
+              Dashboard
+            </button>
+            <button
+              onClick={() => navigate("/generate-program")}
+              className="text-slate-400 hover:text-white px-4 py-2 rounded-lg w-full text-left font-medium transition"
+            >
+              AI Voice Coach
+            </button>
+            <button
+              onClick={() => navigate("/rag")}
+              className="text-slate-400 hover:text-white px-4 py-2 rounded-lg w-full text-left font-medium transition"
+            >
+              RAG Chatbot
+            </button>
+            <button
+              onClick={generatePDF}
+              className="text-slate-400 hover:text-white px-4 py-2 rounded-lg w-full text-left font-medium transition"
+            >
+              Reports (PDF)
+            </button>
+          </nav>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          icon={Dumbbell}
-          label="Workout Time"
-          value={today.workout}
-          unit="mins"
-          onAdd={() => openModal("Workout", "mins", "workout")}
-        />
+      {/* MAIN */}
+      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+        {/* HEADER */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">
+              Dashboard — {user?.name || "Athlete"}
+            </h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Track, analyze, and improve your fitness daily
+            </p>
+          </div>
 
-        <StatCard
-          icon={Moon}
-          label="Sleep"
-          value={today.sleep}
-          unit="hrs"
-          onAdd={() => openModal("Sleep", "hrs", "sleep")}
-        />
-
-        <StatCard
-          icon={Droplet}
-          label="Water Intake"
-          value={today.water}
-          unit="ml"
-          onAdd={() => openModal("Water Intake", "ml", "water")}
-        />
-
-        <StatCard
-          icon={Activity}
-          label="Calories Burned"
-          value={today.calories}
-          unit="kcal"
-          onAdd={() => openModal("Calories", "kcal", "calories")}
-        />
-      </div>
-      {weekly?.length > 0 && (
-        <div className="mb-8">
-          <WeeklyChart data={weekly} />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={generatePDF}
+              className="inline-flex items-center justify-center rounded-2xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition"
+            >
+              Generate AI Fitness Report
+            </button>
+            <button
+              onClick={() => navigate("/rag")}
+              className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition"
+            >
+              Open RAG Bot
+            </button>
+          </div>
         </div>
-      )}
 
-      {/* AI Coach */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex justify-between items-center mt-20">
-        <p className="text-slate-400">
-          💡 Log today’s activity to keep your streak alive
-        </p>
-        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-xl text-slate-900">
-          <Mic size={18} />
-          Talk to AI
-        </button>
+        {/* KPI CARDS */}
+        {analytics && (
+          <div className="grid grid-cols-4 gap-4">
+            <GradientCard
+              title="Sleep"
+              value={analytics.avg_sleep}
+              unit="hrs"
+              color="from-blue-500 to-cyan-500"
+            />
+            <GradientCard
+              title="Water"
+              value={analytics.avg_water}
+              unit="ml"
+              color="from-teal-500 to-emerald-500"
+            />
+            <GradientCard
+              title="Workout"
+              value={analytics.avg_workout}
+              unit="min"
+              color="from-purple-500 to-indigo-600"
+            />
+            <GradientCard
+              title="Fitness Score"
+              value={analytics.fitness_score}
+              unit=""
+              color="from-pink-500 to-red-500"
+            />
+          </div>
+        )}
+
+        {/* 🔥 TODAY LOGGING SECTION */}
+        <div className="bg-[#111827] p-5 rounded-xl border border-white/10">
+          {/* HEADER + CTA */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold">Today’s Log</h2>
+              <p className="text-xs text-slate-400">
+                Start by logging today’s activity
+              </p>
+            </div>
+
+            <button
+              onClick={() => openModal("Workout", "min", "workout")}
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm"
+            >
+              <Plus size={16} />
+              Add Entry
+            </button>
+          </div>
+
+          {/* INPUT CARDS */}
+          <div className="grid grid-cols-4 gap-4">
+            <button
+              onClick={() => openModal("Workout", "min", "workout")}
+              className="bg-[#0b0f1a] p-4 rounded-xl hover:bg-white/5 transition"
+            >
+              <Dumbbell className="mb-2 text-purple-400" />
+              <p className="text-xs text-slate-400">Workout</p>
+              <h3 className="text-lg font-semibold">
+                {today?.workout || 0} min
+              </h3>
+            </button>
+
+            <button
+              onClick={() => openModal("Sleep", "hrs", "sleep")}
+              className="bg-[#0b0f1a] p-4 rounded-xl hover:bg-white/5 transition"
+            >
+              <Moon className="mb-2 text-blue-400" />
+              <p className="text-xs text-slate-400">Sleep</p>
+              <h3 className="text-lg font-semibold">{today?.sleep || 0} hrs</h3>
+            </button>
+
+            <button
+              onClick={() => openModal("Water", "ml", "water")}
+              className="bg-[#0b0f1a] p-4 rounded-xl hover:bg-white/5 transition"
+            >
+              <Droplet className="mb-2 text-cyan-400" />
+              <p className="text-xs text-slate-400">Water</p>
+              <h3 className="text-lg font-semibold">{today?.water || 0} ml</h3>
+            </button>
+
+            <button
+              onClick={() => openModal("Calories", "kcal", "calories")}
+              className="bg-[#0b0f1a] p-4 rounded-xl hover:bg-white/5 transition"
+            >
+              <Activity className="mb-2 text-orange-400" />
+              <p className="text-xs text-slate-400">Calories</p>
+              <h3 className="text-lg font-semibold">
+                {today?.calories || 0} kcal
+              </h3>
+            </button>
+          </div>
+        </div>
+
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-3 gap-6">
+          {/* CHART */}
+          <div className="col-span-2 bg-[#111827] p-5 rounded-xl">
+            <h3 className="mb-3 text-lg">Weekly Trends</h3>
+            {weekly?.length > 0 && <WeeklyChart data={weekly} />}
+          </div>
+
+          {/* INSIGHTS */}
+          <div className="bg-[#111827] p-5 rounded-xl">
+            <h3 className="mb-3 text-lg">Insights</h3>
+
+            {analytics?.insights?.map((item, i) => (
+              <p key={i} className="text-sm text-slate-300 mb-2">
+                • {item}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* EXTRA PANELS */}
+        {analytics && (
+          <div className="grid grid-cols-3 gap-6">
+            <div className="bg-[#111827] p-4 rounded-xl">
+              <h4>Consistency</h4>
+              <p className="text-slate-400 mt-2">{analytics.consistency}</p>
+            </div>
+
+            <div className="bg-[#111827] p-4 rounded-xl">
+              <h4>Fitness Score</h4>
+              <p className="text-emerald-400 text-xl">
+                {analytics.fitness_score}
+              </p>
+            </div>
+
+            <div className="bg-[#111827] p-4 rounded-xl">
+              <h4>Recommendation</h4>
+              <p className="text-slate-400 text-sm">
+                Improve hydration & consistency
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* AI VOICE COACH BANNER */}
+        <div className="bg-[#111827] border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400">
+              <Mic size={24} className="text-indigo-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg text-white">Interactive AI Voice Coach</h3>
+              <p className="text-sm text-slate-400">
+                Log today's activity and start a voice conversation to discuss your progress and get direct feedback.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate("/generate-program")}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition shrink-0"
+          >
+            Talk to AI Coach 🎙️
+          </button>
+        </div>
       </div>
 
-      {/* Modal */}
+      {/* MODAL */}
       <AddEntryModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -204,14 +331,6 @@ const DashboardPage = () => {
         onSubmit={handleSubmit}
         loading={saving}
       />
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={generatePDF}
-          className="bg-emerald-500 hover:bg-emerald-600 text-slate-900 px-6 py-2 rounded-xl font-medium"
-        >
-          Generate AI Fitness Report
-        </button>
-      </div>
     </div>
   );
 };

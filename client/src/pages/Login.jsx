@@ -19,7 +19,7 @@ const Login = () => {
     toastLoading(loadingId);
 
     try {
-      const { data } = await axios.post("http://localhost:3000/api/login", {
+      const { data } = await axios.post("http://localhost:5000/api/login", {
         email,
         password,
       });

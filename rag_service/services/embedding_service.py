@@ -1,18 +1,10 @@
-import os
-from langchain_openai import OpenAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 class EmbeddingService:
     def __init__(self):
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
-            
-        model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-large")
-        
-        self.embeddings = OpenAIEmbeddings(
-            openai_api_key=api_key,
-            model=model
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
 
-    def get_embeddings(self) -> OpenAIEmbeddings:
+    def get_embeddings(self):
         return self.embeddings

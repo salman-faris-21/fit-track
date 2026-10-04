@@ -1,0 +1,52 @@
+# System Files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Node / JS (Common)
+node_modules/
+dist/
+build/
+.npm
+.eslintcache
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.pytest_cache/
+**/venv/
+**/ENV/
+**/env/
+**/.venv/
+
+# Service-Specific Local Directories (rag_service)
+rag_service/chroma_db/
+rag_service/uploads/
+rag_service/vectorstore/
+
+# Environments / Secrets
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+.env.backup
+.env.sample
+**/client/.env
+**/server/.env
+**/rag_service/.env

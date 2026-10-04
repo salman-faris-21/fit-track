@@ -1,7 +1,7 @@
 import os
 import math
 from typing import List, Dict, Any
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from services.embedding_service import EmbeddingService
 from utils.logger import get_logger
 
@@ -17,16 +17,21 @@ def cosine_similarity(v1: List[float], v2: List[float]) -> float:
 
 class LLMService:
     def __init__(self):
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
-            
-        self.completion_model = os.getenv("OPENAI_COMPLETION_MODEL", "gpt-3.5-turbo")
-        self.llm = ChatOpenAI(
-            openai_api_key=api_key,
-            model=self.completion_model,
+            raise ValueError("GROQ_API_KEY environment variable is not set")
+
+        self.completion_model = os.getenv(
+            "GROQ_MODEL",
+            "llama-3.3-70b-versatile"
+        )
+
+        self.llm = ChatGroq(
+            groq_api_key=api_key,
+            model_name=self.completion_model,
             temperature=0.7
         )
+
         self.embedding_service = EmbeddingService()
 
     def generate_answer_from_document_context(self, query: str, context_chunks: List[Dict[str, Any]]) -> str:

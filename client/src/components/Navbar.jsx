@@ -19,12 +19,15 @@ const Logo = () => (
   </Link>
 );
 
-/* ---------------- NAV LINKS ---------------- */
+
 
 const NavLinks = () => (
   <div className="hidden md:flex gap-6 text-white">
     <Link to="/" className="hover:text-indigo-400 transition">
       Home
+    </Link>
+    <Link to="/rag" className="hover:text-indigo-400 transition">
+      RAG Bot
     </Link>
     <Link to="/contact" className="hover:text-indigo-400 transition">
       Contact
@@ -41,7 +44,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // ✅ Auth state from Redux
+  
   const token = useSelector((state) => state.auth.token);
 
   const handleLogout = () => {

@@ -24,8 +24,8 @@ const Signup = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:3000/api/signup",
-        formData
+        "http://localhost:5000/api/signup",
+        formData,
       );
 
       if (data.success) {

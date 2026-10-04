@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Signup from "./components/Signup";
 import CallPage from "./pages/callPage";
 import GenerateProgramPage from "./pages/Generate-program";
+import RagBotPage from "./pages/RagBot";
 import TestVapiSDKCall from "./pages/button";
 import DashboardPage from "./pages/Dashboard.jsx";
 
@@ -56,6 +57,15 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/rag"
+            element={
+              <ProtectedRoute>
+                <RagBotPage />
               </ProtectedRoute>
             }
           />

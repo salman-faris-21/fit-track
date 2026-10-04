@@ -5,6 +5,7 @@ import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import heroImage from "../assets/Hero-image-ft.png";
 import Avatar from "../assets/Avatar.png.avif";
+import api from "../lib/api.js";
 import vapi from "../lib/vapi.js";
 
 const GenerateProgramPage = () => {
@@ -14,6 +15,8 @@ const GenerateProgramPage = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
   const [callEnded, setCallEnded] = useState(false);
+  const [ragResult, setRagResult] = useState("");
+  const [ragLoading, setRagLoading] = useState(false);
   const navigate = useNavigate();
   const messageContainerRef = useRef(null);
 
@@ -112,6 +115,32 @@ const GenerateProgramPage = () => {
     }
   };
 
+  const generateRagPlan = async () => {
+    if (!user) {
+      alert("Please log in to generate your RAG fitness plan.");
+      return;
+    }
+
+    setRagLoading(true);
+    setRagResult("");
+
+    try {
+      const response = await api.post("/rag/generate", {
+        prompt:
+          "Create a personalized 7-day fitness program using the user's recent workout, sleep, water, and calorie logs. Include workout, diet, hydration, sleep targets, and an encouraging coach note.",
+      });
+
+      setRagResult(response.data.result || "No result returned.");
+    } catch (err) {
+      console.error("RAG generation error", err);
+      setRagResult(
+        err?.response?.data?.error || "Unable to generate RAG plan right now.",
+      );
+    } finally {
+      setRagLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen text-foreground overflow-hidden pb-6 pt-24">
       <div className="container mx-auto px-4 h-full max-w-5xl">
@@ -190,10 +219,10 @@ const GenerateProgramPage = () => {
                   {isSpeaking
                     ? "Speaking..."
                     : callActive
-                    ? "Listening..."
-                    : callEnded
-                    ? "Redirecting..."
-                    : "Waiting..."}
+                      ? "Listening..."
+                      : callEnded
+                        ? "Redirecting..."
+                        : "Waiting..."}
                 </span>
               </div>
             </div>
@@ -252,15 +281,15 @@ const GenerateProgramPage = () => {
           </div>
         )}
 
-        {/* Call button */}
-        <div className="w-full flex justify-center gap-4">
+        {/* Call + RAG buttons */}
+        <div className="w-full flex flex-col md:flex-row justify-center gap-4">
           <Button
-            className={`w-40 text-xl rounded-3xl ${
+            className={`w-full md:w-40 text-xl rounded-3xl ${
               callActive
                 ? "bg-destructive hover:bg-destructive/90"
                 : callEnded
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-primary hover:bg-primary/90"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-primary hover:bg-primary/90"
             } text-white relative`}
             onClick={toggleCall}
             disabled={connecting || callEnded}
@@ -272,13 +301,39 @@ const GenerateProgramPage = () => {
               {callActive
                 ? "End Call"
                 : connecting
-                ? "Connecting..."
-                : callEnded
-                ? "View Profile"
-                : "Start Call"}
+                  ? "Connecting..."
+                  : callEnded
+                    ? "View Profile"
+                    : "Start Call"}
             </span>
           </Button>
+
+          <Button
+            className={`w-full md:w-40 text-xl rounded-3xl ${
+              ragLoading
+                ? "bg-secondary/80"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            } text-white relative`}
+            onClick={generateRagPlan}
+            disabled={ragLoading}
+          >
+            {ragLoading && (
+              <span className="absolute inset-0 rounded-full animate-ping bg-emerald-500/40 opacity-75"></span>
+            )}
+            <span>{ragLoading ? "Generating..." : "Generate RAG Plan"}</span>
+          </Button>
         </div>
+
+        {ragResult && (
+          <Card className="mt-6 bg-background border border-border p-4">
+            <h2 className="text-lg font-semibold text-foreground mb-3">
+              RAG Fitness Plan
+            </h2>
+            <pre className="whitespace-pre-wrap text-sm text-foreground">
+              {ragResult}
+            </pre>
+          </Card>
+        )}
       </div>
     </div>
   );
